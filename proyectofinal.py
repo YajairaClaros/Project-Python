@@ -118,3 +118,37 @@ while jugando:
     
     # Actualizar
     todas_las_sprites.update()
+
+# Colisiones entre balas y enemigos
+    colisiones = pygame.sprite.groupcollide(enemigos, balas, True, True)
+    for colision in colisiones:
+        puntaje += 1
+        enemigo = Enemigo()
+        todas_las_sprites.add(enemigo)
+        enemigos.add(enemigo)
+    
+    # Colisiones entre jugador y enemigos
+    colision_jugador = pygame.sprite.spritecollideany(jugador, enemigos)
+    if colision_jugador:
+        jugando = False  # Termina el juego si un enemigo toca al jugador
+    
+    # Dibujar
+    pantalla.fill(NEGRO)
+    todas_las_sprites.draw(pantalla)
+    
+    # Mostrar la puntuación
+    texto_puntaje = fuente.render(f"Puntaje: {puntaje}", True, BLANCO)
+    pantalla.blit(texto_puntaje, (10, 10))
+    
+    # Actualizar la pantalla
+    pygame.display.flip()
+    
+    # Controlar la tasa de fotogramas
+    reloj.tick(60)
+
+# Finalizar Pygame
+pygame.quit()
+
+# Mostrar el mensaje de fin del juego
+print(f"¡Perdiste! Puntaje final: {puntaje}")
+
