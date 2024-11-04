@@ -81,7 +81,7 @@ class Enemigo(pygame.sprite.Sprite):
 todas_las_sprites = pygame.sprite.Group()
 enemigos = pygame.sprite.Group()
 balas = pygame.sprite.Group()
-
+  
 # Crear la nave del jugador
 jugador = NaveJugador()
 todas_las_sprites.add(jugador)
@@ -151,4 +151,3 @@ pygame.quit()
 
 # Mostrar el mensaje de fin del juego
 print(f"¡Perdiste! Puntaje final: {puntaje}")
-
