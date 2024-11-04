@@ -85,3 +85,36 @@ balas = pygame.sprite.Group()
 # Crear la nave del jugador
 jugador = NaveJugador()
 todas_las_sprites.add(jugador)
+
+# Crear los enemigos
+for _ in range(8):
+    enemigo = Enemigo()
+    todas_las_sprites.add(enemigo)
+    enemigos.add(enemigo)
+
+# Puntuación
+puntaje = 0
+fuente = pygame.font.Font(None, 36)
+
+# Reloj para controlar la tasa de fotogramas
+reloj = pygame.time.Clock()
+
+# Bucle principal del juego
+jugando = True
+while jugando:
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            jugando = False
+        elif evento.type == pygame.KEYDOWN:
+            if evento.key == pygame.K_LEFT:
+                jugador.velocidad_x = -8
+            elif evento.key == pygame.K_RIGHT:
+                jugador.velocidad_x = 8
+            elif evento.key == pygame.K_SPACE:
+                jugador.disparar()
+        elif evento.type == pygame.KEYUP:
+            if evento.key == pygame.K_LEFT or evento.key == pygame.K_RIGHT:
+                jugador.velocidad_x = 0
+    
+    # Actualizar
+    todas_las_sprites.update()
