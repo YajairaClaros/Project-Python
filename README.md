@@ -3,5 +3,5 @@ Proyecto Final Python
 Integrantes  
 Jose Álvaro Paiz  
 Dennys Fernando Campos   
-José Fernando Gomez   
+Fernando José Hernandez Gomez   
 Yajaira Isamar Claros  
