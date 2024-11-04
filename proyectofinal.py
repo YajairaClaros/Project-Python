@@ -44,3 +44,44 @@ class NaveJugador(pygame.sprite.Sprite):
         bala = Bala(self.rect.centerx, self.rect.top)
         todas_las_sprites.add(bala)
         balas.add(bala)
+
+# Clase para las balas disparadas por el jugador
+class Bala(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+        self.image = pygame.transform.scale(imagen_bala, (5, 20))
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.top = y
+        self.velocidad_y = -10
+
+    def update(self):
+        self.rect.y += self.velocidad_y
+        if self.rect.bottom < 0:
+            self.kill()
+
+# Clase para los enemigos
+class Enemigo(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.transform.scale(imagen_enemigo, (40, 40))
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(0, ANCHO_PANTALLA - self.rect.width)
+        self.rect.y = random.randint(-100, -40)
+        self.velocidad_y = random.randint(1, 5)
+
+    def update(self):
+        self.rect.y += self.velocidad_y
+        if self.rect.top > ALTO_PANTALLA:
+            self.rect.x = random.randint(0, ANCHO_PANTALLA - self.rect.width)
+            self.rect.y = random.randint(-100, -40)
+            self.velocidad_y = random.randint(1, 5)
+
+# Inicializar el grupo de sprites
+todas_las_sprites = pygame.sprite.Group()
+enemigos = pygame.sprite.Group()
+balas = pygame.sprite.Group()
+
+# Crear la nave del jugador
+jugador = NaveJugador()
+todas_las_sprites.add(jugador)
