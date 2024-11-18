@@ -154,87 +154,91 @@ def mostrar_menu():
                     pygame.quit()
                     quit()       
 
-# Inicializar el grupo de sprites
-todas_las_sprites = pygame.sprite.Group()
-enemigos = pygame.sprite.Group()
-balas = pygame.sprite.Group()
-  
-# Crear la nave del jugador
-jugador = NaveJugador()
-todas_las_sprites.add(jugador)
-
-# Crear los enemigos
-for _ in range(8):
-    enemigo = Enemigo()
-    todas_las_sprites.add(enemigo)
-    enemigos.add(enemigo)
-
-tiempo_inicio = pygame.time.get_ticks()
-
-# Puntuación
-puntaje = 0
-fuente = pygame.font.Font(None, 36)
-
-# Reloj para controlar la tasa de fotogramas
-reloj = pygame.time.Clock()
-
-# Bucle principal del juego
-jugando = True
-while jugando:
-    for evento in pygame.event.get():
-        if evento.type == pygame.QUIT:
-            jugando = False
-        elif evento.type == pygame.KEYDOWN:
-            if evento.key == pygame.K_LEFT:
-                jugador.velocidad_x = -8
-            elif evento.key == pygame.K_RIGHT:
-                jugador.velocidad_x = 8
-            elif evento.key == pygame.K_SPACE:
-                jugador.disparar()
-        elif evento.type == pygame.KEYUP:
-            if evento.key == pygame.K_LEFT or evento.key == pygame.K_RIGHT:
-                jugador.velocidad_x = 0
+def main():
+    global todas_las_sprites,enemigos,balas
+    # Inicializar el grupo de sprites
+    todas_las_sprites = pygame.sprite.Group()
+    enemigos = pygame.sprite.Group()
+    balas = pygame.sprite.Group()
     
-    # Actualizar
-    todas_las_sprites.update()
+    # Crear la nave del jugador
+    jugador = NaveJugador()
+    todas_las_sprites.add(jugador)
 
-# Colisiones entre balas y enemigos
-    colisiones = pygame.sprite.groupcollide(enemigos, balas, True, True)
-    for colision in colisiones:
-        puntaje += 1
+    # Crear los enemigos
+    for _ in range(8):
         enemigo = Enemigo()
         todas_las_sprites.add(enemigo)
         enemigos.add(enemigo)
-    
-    # Colisiones entre jugador y enemigos
-    colision_jugador = pygame.sprite.spritecollideany(jugador, enemigos)
-    if colision_jugador:
-        jugando = False  # Termina el juego si un enemigo toca al jugador
-    
-    tiempo_actual = pygame.time.get_ticks()
-    tiempo_transcurrido = tiempo_actual - tiempo_inicio
-    segundos_transcurridos = tiempo_transcurrido // 1000
-    milisegundos_transcurridos = (tiempo_transcurrido % 1000) // 10
 
-    # Dibujar
-    pantalla.fill(NEGRO)
-    todas_las_sprites.draw(pantalla)
-    
-    # Mostrar la puntuación
-    texto_puntaje = fuente.render(f"Puntaje: {puntaje}", True, BLANCO)
-    pantalla.blit(texto_puntaje, (10, 10))
+    tiempo_inicio = pygame.time.get_ticks()
 
-    texto_tiempo = fuente.render(f"Tiempo: {segundos_transcurridos}:{milisegundos_transcurridos:02d}", True, BLANCO)
-    pantalla.blit(texto_tiempo, (ANCHO_PANTALLA - 200, 10))
-    
-    # Actualizar la pantalla
-    pygame.display.flip()
-    
-    # Controlar la tasa de fotogramas
-    reloj.tick(60)
+    # Puntuación
+    puntaje = 0
+    fuente = pygame.font.Font(None, 36)
 
-# Finalizar Pygame
-pygame.quit()
+    # Reloj para controlar la tasa de fotogramas
+    reloj = pygame.time.Clock()
 
-# Mostrar el mensaje de fin del juego
-print(f"¡Perdiste! Puntaje final: {puntaje}")
+    # Bucle principal del juego
+    jugando = True
+    while jugando:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                jugando = False
+            elif evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_LEFT:
+                    jugador.velocidad_x = -8
+                elif evento.key == pygame.K_RIGHT:
+                    jugador.velocidad_x = 8
+                elif evento.key == pygame.K_SPACE:
+                    jugador.disparar()
+            elif evento.type == pygame.KEYUP:
+                if evento.key == pygame.K_LEFT or evento.key == pygame.K_RIGHT:
+                    jugador.velocidad_x = 0
+        
+        # Actualizar
+        todas_las_sprites.update()
+
+    # Colisiones entre balas y enemigos
+        colisiones = pygame.sprite.groupcollide(enemigos, balas, True, True)
+        for colision in colisiones:
+            puntaje += 1
+            enemigo = Enemigo()
+            todas_las_sprites.add(enemigo)
+            enemigos.add(enemigo)
+        
+        # Colisiones entre jugador y enemigos
+        colision_jugador = pygame.sprite.spritecollideany(jugador, enemigos)
+        if colision_jugador:
+            jugando = False  # Termina el juego si un enemigo toca al jugador
+        
+        tiempo_actual = pygame.time.get_ticks()
+        tiempo_transcurrido = tiempo_actual - tiempo_inicio
+        segundos_transcurridos = tiempo_transcurrido // 1000
+        milisegundos_transcurridos = (tiempo_transcurrido % 1000) // 10
+
+        # Dibujar
+        pantalla.fill(NEGRO)
+        todas_las_sprites.draw(pantalla)
+        
+        # Mostrar la puntuación
+        texto_puntaje = fuente.render(f"Puntaje: {puntaje}", True, BLANCO)
+        pantalla.blit(texto_puntaje, (10, 10))
+
+        texto_tiempo = fuente.render(f"Tiempo: {segundos_transcurridos}:{milisegundos_transcurridos:02d}", True, BLANCO)
+        pantalla.blit(texto_tiempo, (ANCHO_PANTALLA - 200, 10))
+        
+        # Actualizar la pantalla
+        pygame.display.flip()
+        
+        # Controlar la tasa de fotogramas
+        reloj.tick(60)
+
+
+    pygame.mixer.music.stop()
+    mostrar_pantalla_game_over(puntaje, tiempo_transcurrido)
+
+# Iniciar el juego desde el menú
+mostrar_menu()
+main()
