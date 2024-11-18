@@ -99,6 +99,8 @@ for _ in range(8):
     todas_las_sprites.add(enemigo)
     enemigos.add(enemigo)
 
+tiempo_inicio = pygame.time.get_ticks()
+
 # Puntuación
 puntaje = 0
 fuente = pygame.font.Font(None, 36)
@@ -139,6 +141,11 @@ while jugando:
     if colision_jugador:
         jugando = False  # Termina el juego si un enemigo toca al jugador
     
+    tiempo_actual = pygame.time.get_ticks()
+    tiempo_transcurrido = tiempo_actual - tiempo_inicio
+    segundos_transcurridos = tiempo_transcurrido // 1000
+    milisegundos_transcurridos = (tiempo_transcurrido % 1000) // 10
+
     # Dibujar
     pantalla.fill(NEGRO)
     todas_las_sprites.draw(pantalla)
@@ -146,6 +153,9 @@ while jugando:
     # Mostrar la puntuación
     texto_puntaje = fuente.render(f"Puntaje: {puntaje}", True, BLANCO)
     pantalla.blit(texto_puntaje, (10, 10))
+
+    texto_tiempo = fuente.render(f"Tiempo: {segundos_transcurridos}:{milisegundos_transcurridos:02d}", True, BLANCO)
+    pantalla.blit(texto_tiempo, (ANCHO_PANTALLA - 200, 10))
     
     # Actualizar la pantalla
     pygame.display.flip()
