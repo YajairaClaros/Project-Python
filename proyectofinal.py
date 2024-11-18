@@ -84,6 +84,44 @@ class Enemigo(pygame.sprite.Sprite):
             self.rect.y = random.randint(-100, -40)
             self.velocidad_y = random.randint(1, 5)
 
+def mostrar_pantalla_game_over(puntaje, tiempo_transcurrido):
+    pygame.mixer.music.load(musica_game_over)
+    pygame.mixer.music.play(-1)  # Reproducir música de Game Over en bucle
+    
+    pantalla.fill(NEGRO)
+    fuente = pygame.font.Font(None, 74)
+    texto_game_over = fuente.render("GAME OVER", True, ROJO)
+    pantalla.blit(texto_game_over, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 - 100))
+    
+    fuente_opciones = pygame.font.Font(None, 36)
+    texto_reintentar = fuente_opciones.render("Presiona R para Reintentar", True, BLANCO)
+    texto_salir = fuente_opciones.render("Presiona Esc para Salir", True, BLANCO)
+    pantalla.blit(texto_reintentar, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2))
+    pantalla.blit(texto_salir, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 40))
+    
+    texto_puntaje = fuente_opciones.render(f"Puntaje final: {puntaje}", True, BLANCO)
+    pantalla.blit(texto_puntaje, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 80))
+    
+    texto_tiempo = fuente_opciones.render(f"Tiempo jugado: {tiempo_transcurrido // 1000} s", True, BLANCO)
+    pantalla.blit(texto_tiempo, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 120))
+    
+    pygame.display.flip()
+    
+    esperando = True
+    while esperando:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r:
+                    esperando = False
+                    pygame.mixer.music.stop()  # Detener la música de Game Over
+                    main()  # Reiniciar el juego
+                if evento.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()
+
 # Inicializar el grupo de sprites
 todas_las_sprites = pygame.sprite.Group()
 enemigos = pygame.sprite.Group()
