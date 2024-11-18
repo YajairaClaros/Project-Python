@@ -3,6 +3,12 @@ import random
 
 # Inicializar Pygame
 pygame.init()
+pygame.mixer.init()
+
+efecto_disparo = pygame.mixer.Sound("music/disparo.wav")
+musica_menu = "music/menu.mp3"
+musica_juego = "music/musica.mp3"
+musica_game_over = "music/gameover.mp3"
 
 # Dimensiones de la pantalla
 ANCHO_PANTALLA = 800
@@ -19,9 +25,9 @@ pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 pygame.display.set_caption("Galaga Básico con Imágenes")
 
 # Cargar imágenes
-imagen_jugador = pygame.image.load("nave.gif").convert_alpha()
-imagen_bala = pygame.image.load("bala.png").convert_alpha()
-imagen_enemigo = pygame.image.load("enemigo.png").convert_alpha()
+imagen_jugador = pygame.image.load("fotos/nave.gif").convert_alpha()
+imagen_bala = pygame.image.load("fotos/bala.png").convert_alpha()
+imagen_enemigo = pygame.image.load("fotos/enemigo.png").convert_alpha()
 
 # Clase para la nave del jugador
 class NaveJugador(pygame.sprite.Sprite):
@@ -44,12 +50,13 @@ class NaveJugador(pygame.sprite.Sprite):
         bala = Bala(self.rect.centerx, self.rect.top)
         todas_las_sprites.add(bala)
         balas.add(bala)
+        efecto_disparo.play()
 
 # Clase para las balas disparadas por el jugador
 class Bala(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.transform.scale(imagen_bala, (5, 20))
+        self.image = pygame.transform.scale(imagen_bala, (15, 20))
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.top = y
