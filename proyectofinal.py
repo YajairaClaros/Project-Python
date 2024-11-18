@@ -122,6 +122,38 @@ def mostrar_pantalla_game_over(puntaje, tiempo_transcurrido):
                     pygame.quit()
                     quit()
 
+def mostrar_menu():
+    pygame.mixer.music.load(musica_menu)
+    pygame.mixer.music.play(-1)  # Reproducir música del menú en bucle
+    
+    pantalla.fill(NEGRO)
+    fuente_titulo = pygame.font.Font(None, 74)
+    fuente_opciones = pygame.font.Font(None, 36)
+    
+    texto_titulo = fuente_titulo.render("Juego de naves", True, VERDE)
+    pantalla.blit(texto_titulo, (ANCHO_PANTALLA // 2 - 180, ALTO_PANTALLA // 2 - 200))
+    
+    texto_iniciar = fuente_opciones.render("Presiona Espacio para Iniciar", True, BLANCO)
+    pantalla.blit(texto_iniciar, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2))
+    
+    texto_salir = fuente_opciones.render("Presiona Esc para Salir", True, BLANCO)
+    pantalla.blit(texto_salir, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 40))
+    pygame.display.flip()
+    
+    esperando = True
+    while esperando:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_SPACE:
+                    esperando = False  # Iniciar el juego
+                    pygame.mixer.music.stop()  # Detener la música del menú
+                if evento.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    quit()       
+
 # Inicializar el grupo de sprites
 todas_las_sprites = pygame.sprite.Group()
 enemigos = pygame.sprite.Group()
