@@ -130,7 +130,7 @@ def mostrar_menu():
     fuente_titulo = pygame.font.Font(None, 74)
     fuente_opciones = pygame.font.Font(None, 36)
     
-    texto_titulo = fuente_titulo.render("Juego de naves", True, VERDE)
+    texto_titulo = fuente_titulo.render("Space Breaker", True, VERDE)
     pantalla.blit(texto_titulo, (ANCHO_PANTALLA // 2 - 180, ALTO_PANTALLA // 2 - 200))
     
     texto_iniciar = fuente_opciones.render("Presiona Espacio para Iniciar", True, BLANCO)
