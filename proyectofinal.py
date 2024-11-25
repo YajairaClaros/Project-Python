@@ -6,9 +6,9 @@ pygame.init()
 pygame.mixer.init()
 
 efecto_disparo = pygame.mixer.Sound("music/disparo.wav")
-efecto_daño = pygame.mixer.Sound("daño.mp3")
+efecto_daño = pygame.mixer.Sound("music/daño.mp3")
 musica_menu = "music/menu.mp3"
-musica_juego = "music/musica.mp3"
+musica_juego = "music/gamemusic.mp3"
 musica_game_over = "music/gameover.mp3"
 
 # Dimensiones de la pantalla
@@ -23,14 +23,14 @@ VERDE = (0, 255, 0)
 
 # Crear la pantalla
 pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
-pygame.display.set_caption("Galaga Básico con Imágenes")
+pygame.display.set_caption("Space Breaker")
 
 # Cargar imágenes
-imagen_fondo = pygame.image.load("menu.jpeg").convert()
-imagen_fondo2 = pygame.image.load("fondo1.jpeg").convert()
-imagen_fondo3 = pygame.image.load("game.jpeg").convert()
-imagen_nave1 = pygame.image.load("nave.gif").convert_alpha() 
-imagen_nave2 = pygame.image.load("nave2.png").convert_alpha()
+imagen_fondo = pygame.image.load("fotos/fondos/menu.jpeg").convert()
+imagen_fondo2 = pygame.image.load("fotos/fondos/fondo1.jpeg").convert()
+imagen_fondo3 = pygame.image.load("fotos/fondos/game.jpeg").convert()
+imagen_nave1 = pygame.image.load("fotos/nave.gif").convert_alpha() 
+imagen_nave2 = pygame.image.load("fotos/nave2.png").convert_alpha()
 imagen_bala = pygame.image.load("fotos/bala.png").convert_alpha()
 imagen_enemigo = pygame.image.load("fotos/enemigo.png").convert_alpha()
 
@@ -40,17 +40,18 @@ def mostrar_seleccion_nave(): #3
     pygame.mixer.music.play(-1)  # Música en bucle
 
     pantalla.fill(NEGRO)
+    pantalla.blit(imagen_fondo, (0, 0))
     fuente = pygame.font.Font(None, 36)
     
     # Título de la pantalla
     texto_titulo = fuente.render("Selecciona tu nave", True, VERDE)
-    pantalla.blit(texto_titulo, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 - 150))
+    pantalla.blit(texto_titulo, (ANCHO_PANTALLA // 2 - 100, ALTO_PANTALLA // 2 - 100))
 
     # Instrucciones
-    texto_instrucciones = fuente.render("Pulsa 1 para elegir nave 1", True, BLANCO)
-    pantalla.blit(texto_instrucciones, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 25))
-    texto_instrucciones2 = fuente.render("Pulsa 2 para elegir nave 2", True, BLANCO)
-    pantalla.blit(texto_instrucciones2, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 75))
+    texto_instrucciones = fuente.render("Pulsa 1 para elegir nave Thanos", True, BLANCO)
+    pantalla.blit(texto_instrucciones, (ANCHO_PANTALLA // 2 - 125, ALTO_PANTALLA // 2 + 25))
+    texto_instrucciones2 = fuente.render("Pulsa 2 para elegir nave Ultron", True, BLANCO)
+    pantalla.blit(texto_instrucciones2, (ANCHO_PANTALLA // 2 - 125, ALTO_PANTALLA // 2 + 75))
     
     # Actualizar pantalla
     pygame.display.flip()
@@ -82,8 +83,14 @@ class NaveJugador(pygame.sprite.Sprite):
         self.rect.centerx = ANCHO_PANTALLA // 2
         self.rect.bottom = ALTO_PANTALLA - 10
         self.velocidad_x = 0
+        self.invulnerable = False
+        self.tiempo_invulnerabilidad = 0 
 
     def update(self):
+        if self.invulnerable:
+            if pygame.time.get_ticks() - self.tiempo_invulnerabilidad > 2000:  # 2 segundos de invulnerabilidad
+                self.invulnerable = False
+
         self.rect.x += self.velocidad_x
         if self.rect.left < 0:
             self.rect.left = 0
@@ -95,6 +102,10 @@ class NaveJugador(pygame.sprite.Sprite):
         todas_las_sprites.add(bala)
         balas.add(bala)
         efecto_disparo.play()
+    
+    def hacer_invulnerable(self):
+        self.invulnerable = True
+        self.tiempo_invulnerabilidad = pygame.time.get_ticks()  # Guardar el momento en que se hace invulnerable
 
 # Clase para las balas disparadas por el jugador
 class Bala(pygame.sprite.Sprite):
@@ -133,6 +144,7 @@ def mostrar_pantalla_game_over(puntaje, tiempo_transcurrido):
     pygame.mixer.music.play(-1)  # Reproducir música de Game Over en bucle
     
     pantalla.fill(NEGRO)
+    pantalla.blit(imagen_fondo3, (0, 0))
     fuente = pygame.font.Font(None, 74)
     texto_game_over = fuente.render("GAME OVER", True, ROJO)
     pantalla.blit(texto_game_over, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 - 100))
@@ -171,6 +183,7 @@ def mostrar_menu():
     pygame.mixer.music.play(-1)  # Reproducir música del menú en bucle
     
     pantalla.fill(NEGRO)
+    pantalla.blit(imagen_fondo, (0, 0))
     fuente_titulo = pygame.font.Font(None, 74)
     fuente_opciones = pygame.font.Font(None, 36)
     
@@ -200,13 +213,16 @@ def mostrar_menu():
 
 def main():
     global todas_las_sprites,enemigos,balas
-    # Inicializar el grupo de sprites
     todas_las_sprites = pygame.sprite.Group()
     enemigos = pygame.sprite.Group()
     balas = pygame.sprite.Group()
+    seleccion_nave = mostrar_seleccion_nave()
     
+    pygame.mixer.music.load(musica_juego)
+    pygame.mixer.music.play(-1)
+
     # Crear la nave del jugador
-    jugador = NaveJugador()
+    jugador = NaveJugador(seleccion_nave)
     todas_las_sprites.add(jugador)
 
     # Crear los enemigos
@@ -214,6 +230,9 @@ def main():
         enemigo = Enemigo()
         todas_las_sprites.add(enemigo)
         enemigos.add(enemigo)
+
+    # Inicializar las vidas
+    vidas = 3
 
     tiempo_inicio = pygame.time.get_ticks()
 
@@ -244,7 +263,7 @@ def main():
         # Actualizar
         todas_las_sprites.update()
 
-    # Colisiones entre balas y enemigos
+        # Colisiones entre balas y enemigos
         colisiones = pygame.sprite.groupcollide(enemigos, balas, True, True)
         for colision in colisiones:
             puntaje += 1
@@ -253,10 +272,21 @@ def main():
             enemigos.add(enemigo)
         
         # Colisiones entre jugador y enemigos
-        colision_jugador = pygame.sprite.spritecollideany(jugador, enemigos)
-        if colision_jugador:
-            jugando = False  # Termina el juego si un enemigo toca al jugador
-        
+        if not jugador.invulnerable:
+            colision_jugador = pygame.sprite.spritecollideany(jugador, enemigos)
+            if colision_jugador:
+                vidas -= 1  # Perder una vida
+                efecto_daño.play()
+                if vidas <= 0:
+                    jugando = False  # Termina el juego si un enemigo toca al jugador
+                else:
+                    # Hacer invulnerable al jugador por 2 segundos
+                    jugador.hacer_invulnerable()
+                    # Mover al jugador a la posición inicial
+                    jugador.rect.centerx = ANCHO_PANTALLA // 2
+                    jugador.rect.bottom = ALTO_PANTALLA - 10
+                    pygame.time.delay(500) # Pausar un poco después de perder una vida
+
         tiempo_actual = pygame.time.get_ticks()
         tiempo_transcurrido = tiempo_actual - tiempo_inicio
         segundos_transcurridos = tiempo_transcurrido // 1000
@@ -264,11 +294,16 @@ def main():
 
         # Dibujar
         pantalla.fill(NEGRO)
+        pantalla.blit(imagen_fondo2, (0, 0))
         todas_las_sprites.draw(pantalla)
         
         # Mostrar la puntuación
         texto_puntaje = fuente.render(f"Puntaje: {puntaje}", True, BLANCO)
         pantalla.blit(texto_puntaje, (10, 10))
+
+        # Mostrar las vidas
+        texto_vidas = fuente.render(f"Vidas: {vidas}", True, ROJO)
+        pantalla.blit(texto_vidas, (10, 50))
 
         texto_tiempo = fuente.render(f"Tiempo: {segundos_transcurridos}:{milisegundos_transcurridos:02d}", True, BLANCO)
         pantalla.blit(texto_tiempo, (ANCHO_PANTALLA - 200, 10))
