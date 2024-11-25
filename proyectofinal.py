@@ -6,6 +6,7 @@ pygame.init()
 pygame.mixer.init()
 
 efecto_disparo = pygame.mixer.Sound("music/disparo.wav")
+efecto_daño = pygame.mixer.Sound("daño.mp3")
 musica_menu = "music/menu.mp3"
 musica_juego = "music/musica.mp3"
 musica_game_over = "music/gameover.mp3"
@@ -25,15 +26,58 @@ pantalla = pygame.display.set_mode((ANCHO_PANTALLA, ALTO_PANTALLA))
 pygame.display.set_caption("Galaga Básico con Imágenes")
 
 # Cargar imágenes
-imagen_jugador = pygame.image.load("fotos/nave.gif").convert_alpha()
+imagen_fondo = pygame.image.load("menu.jpeg").convert()
+imagen_fondo2 = pygame.image.load("fondo1.jpeg").convert()
+imagen_fondo3 = pygame.image.load("game.jpeg").convert()
+imagen_nave1 = pygame.image.load("nave.gif").convert_alpha() 
+imagen_nave2 = pygame.image.load("nave2.png").convert_alpha()
 imagen_bala = pygame.image.load("fotos/bala.png").convert_alpha()
 imagen_enemigo = pygame.image.load("fotos/enemigo.png").convert_alpha()
 
+# Función para mostrar la pantalla de selección de nave
+def mostrar_seleccion_nave(): #3
+    pygame.mixer.music.load(musica_menu)
+    pygame.mixer.music.play(-1)  # Música en bucle
+
+    pantalla.fill(NEGRO)
+    fuente = pygame.font.Font(None, 36)
+    
+    # Título de la pantalla
+    texto_titulo = fuente.render("Selecciona tu nave", True, VERDE)
+    pantalla.blit(texto_titulo, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 - 150))
+
+    # Instrucciones
+    texto_instrucciones = fuente.render("Pulsa 1 para elegir nave 1", True, BLANCO)
+    pantalla.blit(texto_instrucciones, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 25))
+    texto_instrucciones2 = fuente.render("Pulsa 2 para elegir nave 2", True, BLANCO)
+    pantalla.blit(texto_instrucciones2, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 75))
+    
+    # Actualizar pantalla
+    pygame.display.flip()
+
+    # Esperar que el jugador elija la nave
+    seleccionada = None
+    while seleccionada is None:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_1:  # Selección nave 1
+                    seleccionada = 1
+                if evento.key == pygame.K_2:  # Selección nave 2
+                    seleccionada = 2
+    pygame.mixer.music.stop()  # Detener la música
+    return seleccionada
+
 # Clase para la nave del jugador
 class NaveJugador(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, seleccion_nave):
         super().__init__()
-        self.image = pygame.transform.scale(imagen_jugador, (50, 50))
+        if seleccion_nave == 1: # 4
+            self.image = pygame.transform.scale(imagen_nave1, (70, 70))
+        elif seleccion_nave == 2:
+            self.image = pygame.transform.scale(imagen_nave2, (50, 50))
         self.rect = self.image.get_rect()
         self.rect.centerx = ANCHO_PANTALLA // 2
         self.rect.bottom = ALTO_PANTALLA - 10
