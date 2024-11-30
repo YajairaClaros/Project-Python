@@ -111,7 +111,7 @@ class NaveJugador(pygame.sprite.Sprite):
 class Bala(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.image = pygame.transform.scale(imagen_bala, (15, 20))
+        self.image = pygame.transform.scale(imagen_bala, (25, 30))
         self.rect = self.image.get_rect()
         self.rect.centerx = x
         self.rect.top = y
@@ -187,14 +187,32 @@ def mostrar_menu():
     fuente_titulo = pygame.font.Font(None, 74)
     fuente_opciones = pygame.font.Font(None, 36)
     
-    texto_titulo = fuente_titulo.render("Space Breaker", True, VERDE)
+    texto_titulo = fuente_titulo.render("Juego de naves", True, VERDE)
     pantalla.blit(texto_titulo, (ANCHO_PANTALLA // 2 - 180, ALTO_PANTALLA // 2 - 200))
-    
     texto_iniciar = fuente_opciones.render("Presiona Espacio para Iniciar", True, BLANCO)
-    pantalla.blit(texto_iniciar, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2))
-    
+    pantalla.blit(texto_iniciar, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 - 100))
     texto_salir = fuente_opciones.render("Presiona Esc para Salir", True, BLANCO)
-    pantalla.blit(texto_salir, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 40))
+    pantalla.blit(texto_salir, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 - 50))
+
+    texto_con = fuente_opciones.render("CONTROLES", True, BLANCO)
+    pantalla.blit(texto_con, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 25))
+    imagen_iniciar = pygame.image.load('fotos/teclas/a.png')
+    pantalla.blit(imagen_iniciar, (ANCHO_PANTALLA // 2 - 200, ALTO_PANTALLA // 2 + 50))
+    texto_iniciar = fuente_opciones.render("mover a la izquierda", True, BLANCO)
+    pantalla.blit(texto_iniciar, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 65))
+    imagen_iniciar = pygame.image.load('fotos/teclas/d.png')
+    pantalla.blit(imagen_iniciar, (ANCHO_PANTALLA // 2 - 200, ALTO_PANTALLA // 2 + 100))
+    texto_iniciar = fuente_opciones.render("mover a la derecha", True, BLANCO)
+    pantalla.blit(texto_iniciar, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 115))
+    imagen_iniciar = pygame.image.load('fotos/teclas/espacio.png')
+    pantalla.blit(imagen_iniciar, (ANCHO_PANTALLA // 2 - 200, ALTO_PANTALLA // 2 + 150))
+    texto_iniciar = fuente_opciones.render("disparar", True, BLANCO)
+    pantalla.blit(texto_iniciar, (ANCHO_PANTALLA // 2 + 75, ALTO_PANTALLA // 2 + 165))
+    imagen_iniciar = pygame.image.load('fotos/teclas/e.png')
+    pantalla.blit(imagen_iniciar, (ANCHO_PANTALLA // 2 - 200, ALTO_PANTALLA // 2 + 200))
+    texto_iniciar = fuente_opciones.render("ataque especial", True, BLANCO)
+    pantalla.blit(texto_iniciar, (ANCHO_PANTALLA // 2 - 150, ALTO_PANTALLA // 2 + 215))
+
     pygame.display.flip()
     
     esperando = True
