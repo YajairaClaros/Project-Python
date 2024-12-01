@@ -32,7 +32,9 @@ imagen_fondo3 = pygame.image.load("fotos/fondos/game.jpeg").convert()
 imagen_nave1 = pygame.image.load("fotos/nave.gif").convert_alpha() 
 imagen_nave2 = pygame.image.load("fotos/nave2.png").convert_alpha()
 imagen_bala = pygame.image.load("fotos/bala.png").convert_alpha()
+ataqueEspecial = pygame.image.load("fotos/bala2.png").convert_alpha()
 imagen_enemigo = pygame.image.load("fotos/enemigo.png").convert_alpha()
+imagen_enemigo2 = pygame.image.load("fotos/enem2.webp").convert_alpha()
 
 # Función para mostrar la pantalla de selección de nave
 def mostrar_seleccion_nave(): #3
