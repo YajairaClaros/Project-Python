@@ -32,7 +32,7 @@ imagen_fondo3 = pygame.image.load("fotos/fondos/game.jpeg").convert()
 imagen_nave1 = pygame.image.load("fotos/nave.gif").convert_alpha() 
 imagen_nave2 = pygame.image.load("fotos/nave2.png").convert_alpha()
 imagen_bala = pygame.image.load("fotos/bala.png").convert_alpha()
-ataqueEspecial = pygame.image.load("fotos/bala2.png").convert_alpha()
+ataqueEspecial = pygame.image.load("fotos/balas.png").convert_alpha()
 imagen_enemigo = pygame.image.load("fotos/enemigo.png").convert_alpha()
 imagen_enemigo2 = pygame.image.load("fotos/enem2.webp").convert_alpha()
 
@@ -77,7 +77,7 @@ def mostrar_seleccion_nave(): #3
 class NaveJugador(pygame.sprite.Sprite):
     def __init__(self, seleccion_nave):
         super().__init__()
-        if seleccion_nave == 1: # 4
+        if seleccion_nave == 1: 
             self.image = pygame.transform.scale(imagen_nave1, (70, 70))
         elif seleccion_nave == 2:
             self.image = pygame.transform.scale(imagen_nave2, (50, 50))
@@ -85,10 +85,13 @@ class NaveJugador(pygame.sprite.Sprite):
         self.rect.centerx = ANCHO_PANTALLA // 2
         self.rect.bottom = ALTO_PANTALLA - 10
         self.velocidad_x = 0
+        self.energia = 0  # Comienza con 0 de energía
+        self.energia_maxima = 100  # El valor máximo de energía
         self.invulnerable = False
-        self.tiempo_invulnerabilidad = 0 
+        self.tiempo_invulnerabilidad = 0
+        self.ultimo_disparo_ataque = 0
 
-    def update(self):
+    def update(self): 
         if self.invulnerable:
             if pygame.time.get_ticks() - self.tiempo_invulnerabilidad > 2000:  # 2 segundos de invulnerabilidad
                 self.invulnerable = False
@@ -104,7 +107,18 @@ class NaveJugador(pygame.sprite.Sprite):
         todas_las_sprites.add(bala)
         balas.add(bala)
         efecto_disparo.play()
-    
+
+    def aumentar_energia(self, cantidad):
+        self.energia = min(self.energia + cantidad, self.energia_maxima)
+
+    def disparar_ataque_especial(self):
+        if self.energia == self.energia_maxima:  # Solo dispara si la energía está llena
+            self.energia = 0
+            ataque = AtaqueEspecial(self.rect.centerx, self.rect.top)
+            todas_las_sprites.add(ataque)
+            ataque_especial.add(ataque)
+            pygame.mixer.Sound("disparo.wav").play()
+
     def hacer_invulnerable(self):
         self.invulnerable = True
         self.tiempo_invulnerabilidad = pygame.time.get_ticks()  # Guardar el momento en que se hace invulnerable
@@ -124,6 +138,34 @@ class Bala(pygame.sprite.Sprite):
         if self.rect.bottom < 0:
             self.kill()
 
+class AtaqueEspecial(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        super().__init__()
+
+# Cargar la imagen del proyectil especial
+        self.image = pygame.transform.scale(ataqueEspecial, (150, 150))  
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.top = y
+        self.velocidad_y = -5
+
+    def update(self):
+        self.rect.y += self.velocidad_y
+        if self.rect.bottom < 0:
+            self.kill()
+    
+    def colision_en_area(self, enemigos, puntaje):
+        colisiones = pygame.sprite.spritecollide(self, enemigos, False)
+        for enemigo in colisiones:
+            if self.rect.colliderect(enemigo.rect):  # Si el enemigo está dentro del área de colisión
+                enemigo.kill()  # Destruir el enemigo
+                puntaje += 1  # Sumar puntos por eliminar al enemigo
+                enemigo = Enemigo()
+                todas_las_sprites.add(enemigo)
+                enemigos.add(enemigo)
+        return puntaje 
+
+
 # Clase para los enemigos
 class Enemigo(pygame.sprite.Sprite):
     def __init__(self):
@@ -140,6 +182,29 @@ class Enemigo(pygame.sprite.Sprite):
             self.rect.x = random.randint(0, ANCHO_PANTALLA - self.rect.width)
             self.rect.y = random.randint(-100, -40)
             self.velocidad_y = random.randint(1, 5)
+
+#Clase para los enemigos especiales
+class EnemigoEspecial(Enemigo):
+    def __init__(self):
+        super().__init__()
+        self.vida = 2  # El enemigo especial necesita dos disparos para morir
+        self.image = pygame.transform.scale(imagen_enemigo2, (50, 50))
+        self.rect = self.image.get_rect()
+        self.rect.x = random.randint(0, ANCHO_PANTALLA - self.rect.width)
+        self.rect.y = random.randint(-100, -40)
+        self.velocidad_y = random.randint(3, 5)
+
+    def update(self):
+        super().update()
+
+    def recibir_disparo(self):
+        # Reducir la vida del enemigo al recibir un disparo
+        self.vida -= 1
+        if self.vida <= 0:
+            self.kill()  # Eliminar el enemigo cuando su vida llega a 0
+            return True  # Devuelve True para indicar que murió
+        return False  # Devuelve False si aún tiene vida
+
 
 def mostrar_pantalla_game_over(puntaje, tiempo_transcurrido):
     pygame.mixer.music.load(musica_game_over)
@@ -232,22 +297,29 @@ def mostrar_menu():
                     quit()       
 
 def main():
-    global todas_las_sprites,enemigos,balas
-    todas_las_sprites = pygame.sprite.Group()
-    enemigos = pygame.sprite.Group()
-    balas = pygame.sprite.Group()
-    seleccion_nave = mostrar_seleccion_nave()
+    global todas_las_sprites, enemigos, balas, ataque_especial
+
+    seleccion_nave = mostrar_seleccion_nave()  # Mostrar pantalla de selección de nave
     
     pygame.mixer.music.load(musica_juego)
     pygame.mixer.music.play(-1)
-
-    # Crear la nave del jugador
+    
+    # Inicializar el grupo de sprites
+    todas_las_sprites = pygame.sprite.Group()
+    enemigos = pygame.sprite.Group()
+    balas = pygame.sprite.Group()
+    ataque_especial = pygame.sprite.Group()
+    
+    # Crear la nave del jugador con la nave seleccionada
     jugador = NaveJugador(seleccion_nave)
     todas_las_sprites.add(jugador)
 
-    # Crear los enemigos
+    # Crear los enemigos, algunos de ellos pueden ser especiales
     for _ in range(8):
-        enemigo = Enemigo()
+        if random.random() < 0.2:  # Probabilidad del 20% de crear un enemigo especial
+            enemigo = EnemigoEspecial()
+        else:
+            enemigo = Enemigo()
         todas_las_sprites.add(enemigo)
         enemigos.add(enemigo)
 
@@ -255,6 +327,8 @@ def main():
     vidas = 3
 
     tiempo_inicio = pygame.time.get_ticks()
+    tiempo_90_segundos = tiempo_inicio + 90000  # 90 segundos
+    tiempo_150_segundos = tiempo_inicio + 150000 # 180 segundos
 
     # Puntuación
     puntaje = 0
@@ -270,12 +344,16 @@ def main():
             if evento.type == pygame.QUIT:
                 jugando = False
             elif evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_LEFT:
+                if evento.key == pygame.K_LEFT or evento.key == pygame.K_d:
                     jugador.velocidad_x = -8
-                elif evento.key == pygame.K_RIGHT:
+                elif evento.key == pygame.K_RIGHT or evento.key == pygame.K_a:
                     jugador.velocidad_x = 8
                 elif evento.key == pygame.K_SPACE:
                     jugador.disparar()
+                elif evento.key == pygame.K_e:
+                    if jugador.disparar_ataque_especial():  # Solo disparar si la energía está llena
+                        pass  # Disparar ataque especial
+                    #jugador.disparar_ataque_especial()
             elif evento.type == pygame.KEYUP:
                 if evento.key == pygame.K_LEFT or evento.key == pygame.K_RIGHT:
                     jugador.velocidad_x = 0
@@ -284,56 +362,93 @@ def main():
         todas_las_sprites.update()
 
         # Colisiones entre balas y enemigos
-        colisiones = pygame.sprite.groupcollide(enemigos, balas, True, True)
-        for colision in colisiones:
-            puntaje += 1
-            enemigo = Enemigo()
-            todas_las_sprites.add(enemigo)
-            enemigos.add(enemigo)
+        colisiones = pygame.sprite.groupcollide(enemigos, balas, False, True)
+        for enemigo, balas_impactadas in colisiones.items():
+            if isinstance(enemigo, EnemigoEspecial):
+                # Reducir la vida de los enemigos especiales al ser alcanzados
+                enemigo_muerto = enemigo.recibir_disparo()  # Reducir vida
+                if enemigo_muerto:
+                    puntaje += 2  # Aumentar puntaje al morir
+            else:
+                # Los enemigos normales se destruyen inmediatamente
+                puntaje += 1
+                jugador.aumentar_energia(5)
+                enemigo.kill()
+                # Reemplazar el enemigo destruido por uno nuevo
+                nuevo_enemigo = Enemigo()
+                todas_las_sprites.add(nuevo_enemigo)
+                enemigos.add(nuevo_enemigo)
         
-        # Colisiones entre jugador y enemigos
-        if not jugador.invulnerable:
+        for ataque in ataque_especial:
+            puntaje = ataque.colision_en_area(enemigos, puntaje)
+        
+        # Colisiones entre jugador y enemigos #9
+        if not jugador.invulnerable:  # Solo chequear si no está invulnerable
             colision_jugador = pygame.sprite.spritecollideany(jugador, enemigos)
             if colision_jugador:
                 vidas -= 1  # Perder una vida
                 efecto_daño.play()
                 if vidas <= 0:
-                    jugando = False  # Termina el juego si un enemigo toca al jugador
+                    jugando = False  # Termina el juego si el jugador no tiene vidas
                 else:
                     # Hacer invulnerable al jugador por 2 segundos
                     jugador.hacer_invulnerable()
                     # Mover al jugador a la posición inicial
                     jugador.rect.centerx = ANCHO_PANTALLA // 2
                     jugador.rect.bottom = ALTO_PANTALLA - 10
-                    pygame.time.delay(500) # Pausar un poco después de perder una vida
+                    pygame.time.delay(500)  # Pausar un poco después de perder una vida
 
         tiempo_actual = pygame.time.get_ticks()
         tiempo_transcurrido = tiempo_actual - tiempo_inicio
         segundos_transcurridos = tiempo_transcurrido // 1000
         milisegundos_transcurridos = (tiempo_transcurrido % 1000) // 10
 
+        if pygame.time.get_ticks() >= tiempo_90_segundos:
+            for _ in range(8): # Agregar 8 enemigos adicionales
+                if random.random() < 0.4:  # Probabilidad del 40% de crear un enemigo especial
+                    enemigo = EnemigoEspecial()
+                else:
+                    enemigo = Enemigo()
+                todas_las_sprites.add(enemigo)
+                enemigos.add(enemigo)
+            tiempo_90_segundos = float('inf')  # Evitar que agregue más de una vez
+
+        # Agregar aún más enemigos a los 180 segundos
+        if pygame.time.get_ticks() >= tiempo_150_segundos:
+            for _ in range(16):  # Agregar 16 enemigos adicionales
+                if random.random() < 0.6:  # Probabilidad del 60% de crear un enemigo especial
+                    enemigo = EnemigoEspecial()
+                else:
+                    enemigo = Enemigo()
+                todas_las_sprites.add(enemigo)
+                enemigos.add(enemigo)
+            tiempo_150_segundos = float('inf') 
+
         # Dibujar
         pantalla.fill(NEGRO)
-        pantalla.blit(imagen_fondo2, (0, 0))
+        pantalla.blit(imagen_fondo2, (0, 0)) #8
         todas_las_sprites.draw(pantalla)
         
         # Mostrar la puntuación
         texto_puntaje = fuente.render(f"Puntaje: {puntaje}", True, BLANCO)
         pantalla.blit(texto_puntaje, (10, 10))
 
-        # Mostrar las vidas
-        texto_vidas = fuente.render(f"Vidas: {vidas}", True, ROJO)
-        pantalla.blit(texto_vidas, (10, 50))
-
         texto_tiempo = fuente.render(f"Tiempo: {segundos_transcurridos}:{milisegundos_transcurridos:02d}", True, BLANCO)
         pantalla.blit(texto_tiempo, (ANCHO_PANTALLA - 200, 10))
-        
+
+        # Mostrar las vidas
+        texto_vidas = fuente.render(f"Vidas: {vidas}", True, ROJO)
+        pantalla.blit(texto_vidas, (10, 50))  # Mostrar debajo de la puntuación
+
+        # Mostrar la barra de energía
+        pygame.draw.rect(pantalla, (255, 0, 0), (10, 90, jugador.energia * 2, 20))  # Rojo
+        pygame.draw.rect(pantalla, (255, 255, 255), (10, 90, jugador.energia_maxima * 2, 20), 2)  # Borde blanco
+
         # Actualizar la pantalla
         pygame.display.flip()
         
         # Controlar la tasa de fotogramas
         reloj.tick(60)
-
 
     pygame.mixer.music.stop()
     mostrar_pantalla_game_over(puntaje, tiempo_transcurrido)
