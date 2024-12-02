@@ -5,7 +5,7 @@ import random
 pygame.init()
 pygame.mixer.init()
 
-efecto_disparo = pygame.mixer.Sound("music/disparo.wav")
+efecto_disparo = pygame.mixer.Sound("music/atesp.mp3")
 efecto_daño = pygame.mixer.Sound("music/daño.mp3")
 musica_menu = "music/menu.mp3"
 musica_juego = "music/gamemusic.mp3"
@@ -117,7 +117,7 @@ class NaveJugador(pygame.sprite.Sprite):
             ataque = AtaqueEspecial(self.rect.centerx, self.rect.top)
             todas_las_sprites.add(ataque)
             ataque_especial.add(ataque)
-            pygame.mixer.Sound("disparo.wav").play()
+            pygame.mixer.Sound("music/disparo.wav").play()
 
     def hacer_invulnerable(self):
         self.invulnerable = True
@@ -369,6 +369,7 @@ def main():
                 enemigo_muerto = enemigo.recibir_disparo()  # Reducir vida
                 if enemigo_muerto:
                     puntaje += 2  # Aumentar puntaje al morir
+                    jugador.aumentar_energia(10)
             else:
                 # Los enemigos normales se destruyen inmediatamente
                 puntaje += 1
