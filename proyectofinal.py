@@ -117,7 +117,7 @@ class NaveJugador(pygame.sprite.Sprite):
             ataque = AtaqueEspecial(self.rect.centerx, self.rect.top)
             todas_las_sprites.add(ataque)
             ataque_especial.add(ataque)
-            pygame.mixer.Sound("music/disparo.wav").play()
+            pygame.mixer.Sound("music/disparo.wav").play() # efecto de sonido
 
     def hacer_invulnerable(self):
         self.invulnerable = True
